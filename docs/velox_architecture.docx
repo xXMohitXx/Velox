@@ -1,0 +1,205 @@
+# Velox Language Architecture and Implementation
+
+## 1. Introduction
+
+Velox is a modern programming language designed with performance, safety, and developer experience in mind. This document provides a comprehensive overview of its architecture, implementation details, and design decisions.
+
+## 2. Core Components
+
+### 2.1 Lexical Analyzer (Lexer)
+- Implemented in `src/main/java/com/velox/compiler/lexer/Lexer.java`
+- Uses a state machine approach for token recognition
+- Features:
+  - String interning for memory efficiency
+  - Token pooling for reduced object creation
+  - Support for Unicode characters
+  - Efficient handling of whitespace and comments
+
+### 2.2 Parser
+- Recursive descent parser implementation
+- Handles operator precedence and associativity
+- Features:
+  - Error recovery mechanisms
+  - Detailed error reporting
+  - AST generation
+  - Support for all language constructs
+
+### 2.3 Semantic Analyzer
+- Type checking and validation
+- Symbol table management
+- Features:
+  - Type inference
+  - Scope resolution
+  - Constant folding
+  - Error detection and reporting
+
+### 2.4 Code Generator
+- Bytecode generation
+- Optimization passes
+- Features:
+  - Register allocation
+  - Instruction selection
+  - Control flow optimization
+  - Constant propagation
+
+### 2.5 Virtual Machine
+- Stack-based execution engine
+- Features:
+  - Garbage collection
+  - Exception handling
+  - Debug support
+  - Performance monitoring
+
+## 3. Language Features
+
+### 3.1 Type System
+- Static typing with type inference
+- Support for:
+  - Primitive types (int, float, bool, string)
+  - Complex types (arrays, maps, structs)
+  - Function types
+  - Generic types
+
+### 3.2 Memory Management
+- Automatic garbage collection
+- Features:
+  - Generational collection
+  - Reference counting
+  - Memory pooling
+  - Weak references
+
+### 3.3 Concurrency Model
+- Actor-based concurrency
+- Features:
+  - Message passing
+  - Lightweight processes
+  - Channel-based communication
+  - Synchronization primitives
+
+### 3.4 Standard Library
+- Rich set of built-in functions
+- Modules for:
+  - I/O operations
+  - String manipulation
+  - Collections
+  - Networking
+  - File system access
+
+## 4. Implementation Details
+
+### 4.1 Compiler Pipeline
+1. Source Code → Lexical Analysis
+   - Token generation
+   - Error handling
+   - Whitespace processing
+
+2. Tokens → Syntax Analysis
+   - AST construction
+   - Grammar validation
+   - Error recovery
+
+3. AST → Semantic Analysis
+   - Type checking
+   - Symbol resolution
+   - Constant evaluation
+
+4. AST → Code Generation
+   - Bytecode generation
+   - Optimization
+   - Debug information
+
+### 4.2 Virtual Machine Architecture
+- Stack-based execution
+- Features:
+  - Instruction dispatch
+  - Frame management
+  - Exception handling
+  - Debug support
+
+### 4.3 Memory Management
+- Generational garbage collection
+- Features:
+  - Object allocation
+  - Reference tracking
+  - Collection strategies
+  - Memory compaction
+
+## 5. Performance Considerations
+
+### 5.1 Compiler Optimizations
+- Constant folding
+- Dead code elimination
+- Inlining
+- Loop optimization
+
+### 5.2 Runtime Optimizations
+- JIT compilation
+- Method inlining
+- Escape analysis
+- Memory pooling
+
+### 5.3 Memory Management
+- Object pooling
+- Memory alignment
+- Cache-friendly data structures
+- Efficient garbage collection
+
+## 6. Testing and Quality Assurance
+
+### 6.1 Test Suite
+- Unit tests
+- Integration tests
+- Performance tests
+- Stress tests
+
+### 6.2 Code Quality
+- Static analysis
+- Code coverage
+- Performance profiling
+- Memory leak detection
+
+## 7. Development Tools
+
+### 7.1 Debugger
+- Breakpoint support
+- Variable inspection
+- Call stack analysis
+- Memory inspection
+
+### 7.2 Profiler
+- CPU profiling
+- Memory profiling
+- Thread analysis
+- I/O monitoring
+
+### 7.3 IDE Integration
+- Syntax highlighting
+- Code completion
+- Error detection
+- Refactoring support
+
+## 8. Future Development
+
+### 8.1 Planned Features
+- Advanced type system
+- Enhanced concurrency
+- Better tooling
+- Performance improvements
+
+### 8.2 Roadmap
+- Version 1.0: Core language features
+- Version 1.1: Standard library expansion
+- Version 1.2: Performance optimizations
+- Version 2.0: Major language improvements
+
+## 9. Conclusion
+
+Velox represents a modern approach to programming language design, combining performance, safety, and developer experience. Its architecture is designed to be extensible, maintainable, and efficient.
+
+## 10. References
+
+- Language Specification
+- API Documentation
+- Performance Benchmarks
+- Research Papers
+- Related Projects 
