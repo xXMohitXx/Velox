@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="velox-logo.svg" alt="Velox Logo" width="300"/>
+</p>
+### Logo design by [Me](https://github.com/xXMohitXx)
+
 # Velox Programming Language
 
 Velox is a modern, high-performance programming language designed for both simplicity and power. It combines the ease of use of dynamic languages with the performance and safety of static languages.

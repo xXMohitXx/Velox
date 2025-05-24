@@ -180,3 +180,45 @@ Velox 1.0.0 is a complete release featuring a modern, high-performance programmi
 - Documentation
 - Examples
 - Tutorials 
+
+## Directory Structures
+Velox/
+├── .git/
+├── docs/
+├── src/
+│   ├── main/
+│   │   └── java/
+│   │       └── com/
+│   │           └── velox/
+│   │               ├── compiler/
+│   │               │   ├── ast/
+│   │               │   ├── bytecode/
+│   │               │   ├── codegen/
+│   │               │   ├── error/
+│   │               │   ├── lexer/
+│   │               │   ├── optimizer/
+│   │               │   ├── parser/
+│   │               │   ├── python/
+│   │               │   ├── semantic/
+│   │               │   ├── token/
+│   │               │   ├── util/
+│   │               │   └── Compiler.java
+│   │               ├── ide/
+│   │               │   └── IDESupport.java
+│   │               ├── pkg/
+│   │               │   └── PackageManager.java
+│   │               ├── std/
+│   │               │   └── StandardLibrary.java
+│   │               └── tools/
+│   │                   ├── Formatter.java
+│   │                   ├── Linter.java
+│   │                   ├── Repl.java
+│   │                   └── VeloxCLI.java
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── velox/
+│                   └── compiler/
+├── target/
+├── pom.xml
+└── README.md
