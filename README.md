@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="velox-logo.svg" alt="Velox Logo" width="300"/>
+  <img src="Velox-logo.svg" alt="Velox Logo" width="300"/>
 </p>
 ### Logo design by [Me](https://github.com/xXMohitXx)
 
