@@ -21,9 +21,12 @@ public class CallInstruction implements Instruction {
             args[i] = vm.pop();
         }
         
-        // TODO: Implement function calling
-        // For now, just push a placeholder result
-        vm.push(null);
+        // Call the function
+        if (function instanceof String) {
+            vm.callFunction((String)function, args);
+        } else {
+            throw new RuntimeException("Invalid function object");
+        }
     }
 
     @Override
