@@ -39,6 +39,13 @@ public class DataStructureBridge {
     /**
      * Convert Python data structures to Velox equivalents
      */
+    public static Object toVeloxStructure(Object obj) {
+        if (obj instanceof PyObject) {
+            return toVeloxStructure((PyObject) obj);
+        }
+        return obj;
+    }
+
     public static Object toVeloxStructure(PyObject pyObj) {
         if (pyObj == null || pyObj == Py.None) {
             return null;
@@ -97,6 +104,7 @@ public class DataStructureBridge {
         throw new IllegalArgumentException("Unsupported array type: " + array.getClass());
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<Object, Object> toVeloxMap(PyDictionary dict) {
         Map<Object, Object> map = new HashMap<>();
         dict.items().forEach(item -> {
@@ -109,25 +117,27 @@ public class DataStructureBridge {
         return map;
     }
 
+    @SuppressWarnings("unchecked")
     private static List<Object> toVeloxList(PyList list) {
-        return list.stream()
+        return (List<Object>) list.stream()
             .map(DataStructureBridge::toVeloxStructure)
             .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     private static Set<Object> toVeloxSet(PySet set) {
-        return set.stream()
+        return (Set<Object>) set.stream()
             .map(DataStructureBridge::toVeloxStructure)
             .collect(Collectors.toSet());
     }
 
     private static Object toVeloxArray(PyArray array) {
-        if (array.getType() == PyInteger.class) {
-            return array.toArray(new Integer[0]);
-        } else if (array.getType() == PyFloat.class) {
-            return array.toArray(new Double[0]);
-        } else if (array.getType() == PyString.class) {
-            return array.toArray(new String[0]);
+        if (array.getType().equals(PyInteger.TYPE)) {
+            return array.__tojava__(Integer[].class);
+        } else if (array.getType().equals(PyFloat.TYPE)) {
+            return array.__tojava__(Double[].class);
+        } else if (array.getType().equals(PyString.TYPE)) {
+            return array.__tojava__(String[].class);
         }
         throw new IllegalArgumentException("Unsupported array type: " + array.getType());
     }

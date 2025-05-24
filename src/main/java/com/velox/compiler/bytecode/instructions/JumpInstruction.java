@@ -4,9 +4,13 @@ import com.velox.compiler.bytecode.Instruction;
 import com.velox.compiler.bytecode.VirtualMachine;
 
 public class JumpInstruction implements Instruction {
-    private final int offset;
+    private int offset;
 
     public JumpInstruction(int offset) {
+        this.offset = offset;
+    }
+
+    public void setOffset(int offset) {
         this.offset = offset;
     }
 
@@ -17,6 +21,6 @@ public class JumpInstruction implements Instruction {
 
     @Override
     public String toString() {
-        return "JMP " + offset;
+        return "JUMP " + offset;
     }
 } 

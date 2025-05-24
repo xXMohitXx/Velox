@@ -4,11 +4,11 @@ import com.velox.compiler.token.Token;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassNode extends ASTNode {
+public class ClassNode extends AST {
     private final String name;
     private final List<FieldNode> fields;
     private final List<MethodNode> methods;
-    private final ConstructorNode constructor;
+    private ConstructorNode constructor;
     private final boolean isPublic;
 
     public ClassNode(Token token, String name, boolean isPublic) {

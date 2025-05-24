@@ -2,6 +2,7 @@ package com.velox.compiler.bytecode;
 
 import java.util.*;
 import java.io.PrintStream;
+import com.velox.compiler.error.RuntimeError;
 
 public class VirtualMachine {
     private final Bytecode bytecode;

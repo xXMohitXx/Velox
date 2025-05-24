@@ -1,6 +1,7 @@
 package com.velox.compiler.lexer;
 
 import java.util.List;
+import com.velox.compiler.token.Token;
 
 /**
  * Test class for the Velox lexer.
@@ -28,7 +29,7 @@ public class LexerTest {
 
         // Create lexer and scan tokens
         Lexer lexer = new Lexer(source);
-        List<Token> tokens = lexer.scanTokens();
+        List<Token> tokens = lexer.tokenize(source);
 
         // Print tokens
         for (Token token : tokens) {

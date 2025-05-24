@@ -4,25 +4,30 @@ import com.velox.compiler.bytecode.Instruction;
 import com.velox.compiler.bytecode.VirtualMachine;
 
 public class CallInstruction implements Instruction {
-    private final String functionName;
     private final int argumentCount;
 
-    public CallInstruction(String functionName, int argumentCount) {
-        this.functionName = functionName;
+    public CallInstruction(int argumentCount) {
         this.argumentCount = argumentCount;
     }
 
     @Override
     public void execute(VirtualMachine vm) {
+        // Get the function object from the stack
+        Object function = vm.pop();
+        
+        // Get the arguments from the stack
         Object[] args = new Object[argumentCount];
         for (int i = argumentCount - 1; i >= 0; i--) {
             args[i] = vm.pop();
         }
-        vm.callFunction(functionName, args);
+        
+        // TODO: Implement function calling
+        // For now, just push a placeholder result
+        vm.push(null);
     }
 
     @Override
     public String toString() {
-        return String.format("CALL %s(%d)", functionName, argumentCount);
+        return "CALL " + argumentCount;
     }
 } 

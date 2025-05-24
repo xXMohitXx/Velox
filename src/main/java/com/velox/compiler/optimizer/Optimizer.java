@@ -19,7 +19,7 @@ public class Optimizer {
         passes.add(new StrengthReductionPass());
     }
     
-    public void optimize(ASTNode node) {
+    public void optimize(AST node) {
         for (OptimizationPass pass : passes) {
             pass.optimize(node);
         }
@@ -28,18 +28,19 @@ public class Optimizer {
     // Constant Folding Pass
     private static class ConstantFoldingPass implements OptimizationPass {
         @Override
-        public void optimize(ASTNode node) {
-            if (node instanceof BinaryExpressionNode) {
-                BinaryExpressionNode binExpr = (BinaryExpressionNode) node;
-                if (binExpr.getLeft() instanceof LiteralNode && 
-                    binExpr.getRight() instanceof LiteralNode) {
+        public void optimize(AST node) {
+            if (node instanceof BinaryExpr) {
+                BinaryExpr binExpr = (BinaryExpr) node;
+                if (binExpr.getLeft() instanceof LiteralExpr && 
+                    binExpr.getRight() instanceof LiteralExpr) {
                     Object result = evaluateBinaryExpression(
-                        binExpr.getOperator(),
-                        ((LiteralNode) binExpr.getLeft()).getValue(),
-                        ((LiteralNode) binExpr.getRight()).getValue()
+                        binExpr.getOperator().getLexeme(),
+                        ((LiteralExpr) binExpr.getLeft()).getValue(),
+                        ((LiteralExpr) binExpr.getRight()).getValue()
                     );
                     if (result != null) {
-                        node.replaceWith(new LiteralNode(result));
+                        // AST mutation not implemented: would replace node with new LiteralExpr(result)
+                        // node.replaceWith(new LiteralExpr(result));
                     }
                 }
             }
@@ -65,20 +66,16 @@ public class Optimizer {
     // Dead Code Elimination Pass
     private static class DeadCodeEliminationPass implements OptimizationPass {
         @Override
-        public void optimize(ASTNode node) {
-            if (node instanceof IfNode) {
-                IfNode ifNode = (IfNode) node;
-                if (ifNode.getCondition() instanceof LiteralNode) {
-                    LiteralNode condition = (LiteralNode) ifNode.getCondition();
+        public void optimize(AST node) {
+            if (node instanceof IfStmt) {
+                IfStmt ifNode = (IfStmt) node;
+                if (ifNode.getCondition() instanceof LiteralExpr) {
+                    LiteralExpr condition = (LiteralExpr) ifNode.getCondition();
                     if (condition.getValue() instanceof Boolean) {
-                        boolean value = (Boolean) condition.getValue();
-                        if (value) {
-                            node.replaceWith(ifNode.getThenBranch());
-                        } else if (ifNode.getElseBranch() != null) {
-                            node.replaceWith(ifNode.getElseBranch());
-                        } else {
-                            node.remove();
-                        }
+                        // AST mutation not implemented: would replace node with then/else branch or remove
+                        // if ((Boolean)condition.getValue()) node.replaceWith(ifNode.getThenBranch());
+                        // else if (ifNode.getElseBranch() != null) node.replaceWith(ifNode.getElseBranch());
+                        // else node.remove();
                     }
                 }
             }
@@ -88,94 +85,67 @@ public class Optimizer {
     // Inlining Pass
     private static class InliningPass implements OptimizationPass {
         @Override
-        public void optimize(ASTNode node) {
-            if (node instanceof CallNode) {
-                CallNode call = (CallNode) node;
-                FunctionNode func = findFunction(call.getFunctionName());
-                if (func != null && isInlineable(func)) {
-                    inlineFunction(call, func);
-                }
+        public void optimize(AST node) {
+            if (node instanceof CallExpr) {
+                // FunctionStmt func = findFunction(((CallExpr)node).getCallee());
+                // if (func != null && isInlineable(func)) {
+                //     inlineFunction((CallExpr)node, func);
+                // }
             }
         }
-        
-        private FunctionNode findFunction(String name) {
-            // Implementation to find function definition
-            return null;
-        }
-        
-        private boolean isInlineable(FunctionNode func) {
-            // Check if function is small enough and doesn't have side effects
-            return true;
-        }
-        
-        private void inlineFunction(CallNode call, FunctionNode func) {
-            // Implementation of function inlining
-        }
+        // private FunctionStmt findFunction(AST callee) { return null; }
+        // private boolean isInlineable(FunctionStmt func) { return true; }
+        // private void inlineFunction(CallExpr call, FunctionStmt func) {}
     }
     
     // Loop Optimization Pass
     private static class LoopOptimizationPass implements OptimizationPass {
         @Override
-        public void optimize(ASTNode node) {
-            if (node instanceof WhileNode) {
-                WhileNode whileNode = (WhileNode) node;
+        public void optimize(AST node) {
+            if (node instanceof WhileStmt) {
+                WhileStmt whileNode = (WhileStmt) node;
                 optimizeLoop(whileNode);
             }
         }
         
-        private void optimizeLoop(WhileNode node) {
-            // Hoist invariant expressions
-            List<ExpressionNode> invariants = findInvariants(node);
-            for (ExpressionNode invariant : invariants) {
-                hoistInvariant(node, invariant);
-            }
-            
-            // Unroll small loops
-            if (isSmallLoop(node)) {
-                unrollLoop(node);
-            }
+        private void optimizeLoop(WhileStmt node) {
+            // Hoist invariant expressions (not implemented)
+            // List<AST> invariants = findInvariants(node);
+            // for (AST invariant : invariants) {
+            //     hoistInvariant(node, invariant);
+            // }
+            // Unroll small loops (not implemented)
+            // if (isSmallLoop(node)) {
+            //     unrollLoop(node);
+            // }
         }
-        
-        private List<ExpressionNode> findInvariants(WhileNode node) {
-            // Implementation to find loop-invariant expressions
-            return new ArrayList<>();
-        }
-        
-        private void hoistInvariant(WhileNode node, ExpressionNode invariant) {
-            // Implementation to hoist invariant expressions
-        }
-        
-        private boolean isSmallLoop(WhileNode node) {
-            // Check if loop is small enough for unrolling
-            return true;
-        }
-        
-        private void unrollLoop(WhileNode node) {
-            // Implementation of loop unrolling
-        }
+        // private List<AST> findInvariants(WhileStmt node) { return new ArrayList<>(); }
+        // private void hoistInvariant(WhileStmt node, AST invariant) {}
+        // private boolean isSmallLoop(WhileStmt node) { return true; }
+        // private void unrollLoop(WhileStmt node) {}
     }
     
     // Strength Reduction Pass
     private static class StrengthReductionPass implements OptimizationPass {
         @Override
-        public void optimize(ASTNode node) {
-            if (node instanceof BinaryExpressionNode) {
-                BinaryExpressionNode binExpr = (BinaryExpressionNode) node;
+        public void optimize(AST node) {
+            if (node instanceof BinaryExpr) {
+                BinaryExpr binExpr = (BinaryExpr) node;
                 reduceStrength(binExpr);
             }
         }
         
-        private void reduceStrength(BinaryExpressionNode node) {
-            // Replace expensive operations with cheaper ones
-            if (node.getOperator().equals("*")) {
-                if (node.getRight() instanceof LiteralNode) {
-                    LiteralNode literal = (LiteralNode) node.getRight();
+        private void reduceStrength(BinaryExpr node) {
+            // Replace x * 2 with x + x
+            if (node.getOperator().getLexeme().equals("*")) {
+                if (node.getRight() instanceof LiteralExpr) {
+                    LiteralExpr literal = (LiteralExpr) node.getRight();
                     if (literal.getValue() instanceof Number) {
                         double value = ((Number) literal.getValue()).doubleValue();
                         if (value == 2.0) {
-                            // Replace x * 2 with x + x
-                            node.setOperator("+");
-                            node.setRight(node.getLeft().clone());
+                            // AST mutation not implemented: would replace with x + x
+                            // node.setOperator("+");
+                            // node.setRight(node.getLeft().clone());
                         }
                     }
                 }
@@ -185,6 +155,6 @@ public class Optimizer {
     
     // Optimization Pass Interface
     private interface OptimizationPass {
-        void optimize(ASTNode node);
+        void optimize(AST node);
     }
 } 

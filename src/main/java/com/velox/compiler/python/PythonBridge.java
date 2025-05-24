@@ -75,6 +75,7 @@ public class PythonBridge {
      * @param targetClass The target Java class
      * @return The equivalent Java object
      */
+    @SuppressWarnings("unchecked")
     public static <T> T toJava(PyObject pyObj, Class<T> targetClass) {
         return (T) pyObj.__tojava__(targetClass);
     }

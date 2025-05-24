@@ -1,8 +1,6 @@
 package com.velox.compiler.semantic;
 
 import com.velox.compiler.ast.*;
-import com.velox.compiler.ast.expressions.*;
-import com.velox.compiler.error.SemanticError;
 import com.velox.compiler.error.ErrorHandler;
 
 public class TypeChecker {
@@ -12,55 +10,56 @@ public class TypeChecker {
         this.errorHandler = errorHandler;
     }
 
-    public void checkExpression(ExpressionNode expression) {
-        if (expression instanceof BinaryExpressionNode) {
-            checkBinaryExpression((BinaryExpressionNode) expression);
-        } else if (expression instanceof UnaryExpressionNode) {
-            checkUnaryExpression((UnaryExpressionNode) expression);
-        } else if (expression instanceof LiteralNode) {
-            checkLiteral((LiteralNode) expression);
-        } else if (expression instanceof IdentifierNode) {
-            checkIdentifier((IdentifierNode) expression);
-        } else if (expression instanceof CallNode) {
-            checkCall((CallNode) expression);
-        } else if (expression instanceof AssignmentNode) {
-            checkAssignment((AssignmentNode) expression);
+    public void checkExpression(AST expression) {
+        if (expression instanceof BinaryExpr) {
+            checkBinaryExpression((BinaryExpr) expression);
+        } else if (expression instanceof UnaryExpr) {
+            checkUnaryExpression((UnaryExpr) expression);
+        } else if (expression instanceof LiteralExpr) {
+            checkLiteral((LiteralExpr) expression);
+        } else if (expression instanceof VariableExpr) {
+            checkIdentifier((VariableExpr) expression);
+        } else if (expression instanceof CallExpr) {
+            checkCall((CallExpr) expression);
+        } else if (expression instanceof AssignExpr) {
+            checkAssignment((AssignExpr) expression);
         }
     }
 
-    private void checkBinaryExpression(BinaryExpressionNode expression) {
+    private void checkBinaryExpression(BinaryExpr expression) {
         checkExpression(expression.getLeft());
         checkExpression(expression.getRight());
 
         // Check operator compatibility
-        switch (expression.getOperator()) {
-            case PLUS:
-            case MINUS:
-            case STAR:
-            case SLASH:
+        String operator = expression.getOperator().getLexeme();
+        switch (operator) {
+            case "+":
+            case "-":
+            case "*":
+            case "/":
                 // Arithmetic operators
                 if (!isNumericType(expression.getLeft()) || !isNumericType(expression.getRight())) {
                     error(expression, "Arithmetic operators require numeric operands");
                 }
                 break;
-            case EQUAL_EQUAL:
-            case BANG_EQUAL:
+            case "==":
+            case "!=":
                 // Comparison operators
                 if (!areTypesCompatible(expression.getLeft(), expression.getRight())) {
                     error(expression, "Cannot compare values of different types");
                 }
                 break;
-            case LESS:
-            case LESS_EQUAL:
-            case GREATER:
-            case GREATER_EQUAL:
+            case "<":
+            case "<=":
+            case ">":
+            case ">=":
                 // Relational operators
                 if (!isNumericType(expression.getLeft()) || !isNumericType(expression.getRight())) {
                     error(expression, "Relational operators require numeric operands");
                 }
                 break;
-            case AND:
-            case OR:
+            case "&&":
+            case "||":
                 // Logical operators
                 if (!isBooleanType(expression.getLeft()) || !isBooleanType(expression.getRight())) {
                     error(expression, "Logical operators require boolean operands");
@@ -69,37 +68,38 @@ public class TypeChecker {
         }
     }
 
-    private void checkUnaryExpression(UnaryExpressionNode expression) {
-        checkExpression(expression.getOperand());
+    private void checkUnaryExpression(UnaryExpr expression) {
+        checkExpression(expression.getRight());
 
-        switch (expression.getOperator()) {
-            case MINUS:
-                if (!isNumericType(expression.getOperand())) {
+        String operator = expression.getOperator().getLexeme();
+        switch (operator) {
+            case "-":
+                if (!isNumericType(expression.getRight())) {
                     error(expression, "Unary minus requires numeric operand");
                 }
                 break;
-            case BANG:
-                if (!isBooleanType(expression.getOperand())) {
+            case "!":
+                if (!isBooleanType(expression.getRight())) {
                     error(expression, "Logical not requires boolean operand");
                 }
                 break;
         }
     }
 
-    private void checkLiteral(LiteralNode expression) {
+    private void checkLiteral(LiteralExpr expression) {
         // Literals are always valid
     }
 
-    private void checkIdentifier(IdentifierNode expression) {
+    private void checkIdentifier(VariableExpr expression) {
         // Check if identifier is defined in current scope
         // This is handled by the semantic analyzer
     }
 
-    private void checkCall(CallNode expression) {
+    private void checkCall(CallExpr expression) {
         checkExpression(expression.getCallee());
 
         // Check arguments
-        for (ASTNode argument : expression.getArguments()) {
+        for (AST argument : expression.getArguments()) {
             checkExpression(argument);
         }
 
@@ -109,41 +109,79 @@ public class TypeChecker {
         }
     }
 
-    private void checkAssignment(AssignmentNode expression) {
+    private void checkAssignment(AssignExpr expression) {
         checkExpression(expression.getValue());
 
         // Check if target is assignable
-        if (!isAssignable(expression.getName())) {
+        if (!isAssignable(expression.getToken().getLexeme())) {
             error(expression, "Cannot assign to this expression");
         }
     }
 
-    private boolean isNumericType(ASTNode node) {
-        // TODO: Implement numeric type check
+    private boolean isNumericType(AST node) {
+        if (node instanceof LiteralExpr) {
+            Object value = ((LiteralExpr) node).getValue();
+            return value instanceof Number;
+        }
+        // TODO: Add type inference for variables and expressions
+        return false;
+    }
+
+    private boolean isBooleanType(AST node) {
+        if (node instanceof LiteralExpr) {
+            Object value = ((LiteralExpr) node).getValue();
+            return value instanceof Boolean;
+        }
+        // TODO: Add type inference for variables and expressions
+        return false;
+    }
+
+    private boolean areTypesCompatible(AST left, AST right) {
+        // For now, only check literal types
+        if (left instanceof LiteralExpr && right instanceof LiteralExpr) {
+            Object leftValue = ((LiteralExpr) left).getValue();
+            Object rightValue = ((LiteralExpr) right).getValue();
+            
+            // Same type is always compatible
+            if (leftValue.getClass() == rightValue.getClass()) {
+                return true;
+            }
+            
+            // Numbers are compatible with each other
+            if (leftValue instanceof Number && rightValue instanceof Number) {
+                return true;
+            }
+            
+            // Strings are compatible with each other
+            if (leftValue instanceof String && rightValue instanceof String) {
+                return true;
+            }
+            
+            // Booleans are compatible with each other
+            if (leftValue instanceof Boolean && rightValue instanceof Boolean) {
+                return true;
+            }
+            
+            return false;
+        }
+        // TODO: Add type inference for variables and expressions
         return true;
     }
 
-    private boolean isBooleanType(ASTNode node) {
-        // TODO: Implement boolean type check
-        return true;
-    }
-
-    private boolean areTypesCompatible(ASTNode left, ASTNode right) {
-        // TODO: Implement type compatibility check
-        return true;
-    }
-
-    private boolean isCallable(ASTNode node) {
-        // TODO: Implement callable check
-        return true;
+    private boolean isCallable(AST node) {
+        // For now, only function calls and method calls are callable
+        return node instanceof CallExpr || 
+               (node instanceof VariableExpr && 
+                ((VariableExpr) node).getToken().getLexeme().startsWith("fn_"));
     }
 
     private boolean isAssignable(String name) {
-        // TODO: Implement assignable check
-        return true;
+        // For now, only variables can be assigned to
+        // TODO: Add support for object properties and array elements
+        return !name.startsWith("fn_") && !name.equals("this") && !name.equals("super");
     }
 
-    private void error(ASTNode node, String message) {
-        errorHandler.handleError(new SemanticError(node.getToken(), message));
+    private void error(AST node, String message) {
+        errorHandler.handleError(message);
     }
 } 

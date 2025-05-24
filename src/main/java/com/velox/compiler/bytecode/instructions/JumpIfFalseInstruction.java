@@ -4,26 +4,34 @@ import com.velox.compiler.bytecode.Instruction;
 import com.velox.compiler.bytecode.VirtualMachine;
 
 public class JumpIfFalseInstruction implements Instruction {
-    private final int offset;
+    private int offset;
 
     public JumpIfFalseInstruction(int offset) {
+        this.offset = offset;
+    }
+
+    public void setOffset(int offset) {
         this.offset = offset;
     }
 
     @Override
     public void execute(VirtualMachine vm) {
         Object condition = vm.pop();
-        if (!(condition instanceof Boolean)) {
-            throw new RuntimeException("Condition must be a boolean");
-        }
-        
-        if (!(Boolean) condition) {
+        if (!isTrue(condition)) {
             vm.jump(offset);
         }
     }
 
+    private boolean isTrue(Object value) {
+        if (value == null) return false;
+        if (value instanceof Boolean) return (Boolean) value;
+        if (value instanceof Number) return ((Number) value).doubleValue() != 0;
+        if (value instanceof String) return !((String) value).isEmpty();
+        return true;
+    }
+
     @Override
     public String toString() {
-        return "JMPF " + offset;
+        return "JUMP_IF_FALSE " + offset;
     }
 } 

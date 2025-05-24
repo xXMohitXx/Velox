@@ -1,13 +1,13 @@
 package com.velox.compiler.semantic;
 
-import com.velox.compiler.ast.TypeAnnotationNode;
+import com.velox.compiler.ast.TypeAnnotation;
 
 public class Symbol {
     private final String name;
-    private final TypeAnnotationNode type;
+    private final TypeAnnotation type;
     private final boolean isConst;
 
-    public Symbol(String name, TypeAnnotationNode type, boolean isConst) {
+    public Symbol(String name, TypeAnnotation type, boolean isConst) {
         this.name = name;
         this.type = type;
         this.isConst = isConst;
@@ -17,7 +17,7 @@ public class Symbol {
         return name;
     }
 
-    public TypeAnnotationNode getType() {
+    public TypeAnnotation getType() {
         return type;
     }
 

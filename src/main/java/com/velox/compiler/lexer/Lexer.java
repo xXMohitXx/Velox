@@ -12,7 +12,6 @@ import java.util.List;
  */
 public class Lexer {
     private final StringInterner stringInterner;
-    private final TokenPool tokenPool;
     private String source;
     private int current;
     private int start;
@@ -21,7 +20,15 @@ public class Lexer {
 
     public Lexer() {
         this.stringInterner = new StringInterner();
-        this.tokenPool = new TokenPool();
+        this.current = 0;
+        this.start = 0;
+        this.line = 1;
+        this.column = 1;
+    }
+
+    public Lexer(String source) {
+        this.stringInterner = new StringInterner();
+        this.source = source;
         this.current = 0;
         this.start = 0;
         this.line = 1;
@@ -44,7 +51,7 @@ public class Lexer {
                     tokens.add(token);
                 }
             } catch (Exception e) {
-                throw new LexicalError("Error at line " + line + ", column " + column, e);
+                throw new LexicalError("Error at line " + line + ", column " + column + ": " + e.getMessage(), e);
             }
         }
 
@@ -52,7 +59,7 @@ public class Lexer {
         return tokens;
     }
 
-    private Token scanToken() {
+    private Token scanToken() throws LexicalError {
         char c = advance();
         switch (c) {
             case '(': return createToken(TokenType.LEFT_PAREN);
@@ -94,7 +101,7 @@ public class Lexer {
         }
     }
 
-    private Token string() {
+    private Token string() throws LexicalError {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') {
                 line++;
@@ -104,7 +111,7 @@ public class Lexer {
         }
 
         if (isAtEnd()) {
-            throw new LexicalError("Unterminated string.");
+            throw new LexicalError("Unterminated string at line " + line);
         }
 
         advance(); // The closing ".
@@ -184,6 +191,6 @@ public class Lexer {
 
     private Token createToken(TokenType type, Object literal) {
         String text = source.substring(start, current);
-        return tokenPool.acquire(type, stringInterner.intern(text), literal, line, column);
+        return new Token(type, stringInterner.intern(text), literal, line, column);
     }
 } 

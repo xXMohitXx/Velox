@@ -10,6 +10,11 @@ public class ParseError extends CompilationError {
         this.token = token;
     }
 
+    public ParseError(String message, Token token) {
+        super(message + " at " + (token != null ? token.toString() : "unknown token"));
+        this.token = token;
+    }
+
     public Token getToken() {
         return token;
     }

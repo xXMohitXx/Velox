@@ -4,10 +4,10 @@ import com.velox.compiler.token.Token;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModuleNode extends ASTNode {
+public class ModuleNode extends AST {
     private final String name;
     private final List<ImportNode> imports;
-    private final List<ASTNode> declarations;
+    private final List<AST> declarations;
 
     public ModuleNode(Token token, String name) {
         super(token);
@@ -24,7 +24,7 @@ public class ModuleNode extends ASTNode {
         return imports;
     }
 
-    public List<ASTNode> getDeclarations() {
+    public List<AST> getDeclarations() {
         return declarations;
     }
 
@@ -32,12 +32,15 @@ public class ModuleNode extends ASTNode {
         imports.add(importNode);
     }
 
-    public void addDeclaration(ASTNode declaration) {
+    public void addDeclaration(AST declaration) {
         declarations.add(declaration);
     }
 
     @Override
     public <R> R accept(ASTVisitor<R> visitor) {
-        return visitor.visitModule(this);
+        if (visitor instanceof StmtVisitor) {
+            return ((StmtVisitor<R>) visitor).visitModule(this);
+        }
+        throw new UnsupportedOperationException("Visitor must implement StmtVisitor");
     }
 } 

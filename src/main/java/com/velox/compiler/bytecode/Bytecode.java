@@ -1,98 +1,76 @@
 package com.velox.compiler.bytecode;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
+/**
+ * Represents the compiled bytecode for a Velox program
+ */
 public class Bytecode {
-    private final List<Instruction> instructions;
-    private final List<Constant> constants;
-    private final Map<String, Integer> functionOffsets;
-    private final Map<String, Integer> globalOffsets;
+    private final List<Byte> code;
+    private final List<Object> constants;
+    private final List<Integer> lines;
+    private final Map<String, Integer> functionOffsets = new HashMap<>();
 
     public Bytecode() {
-        this.instructions = new ArrayList<>();
+        this.code = new ArrayList<>();
         this.constants = new ArrayList<>();
-        this.functionOffsets = new HashMap<>();
-        this.globalOffsets = new HashMap<>();
+        this.lines = new ArrayList<>();
     }
 
-    public void addInstruction(Instruction instruction) {
-        instructions.add(instruction);
+    public void add(byte instruction, int line) {
+        code.add(instruction);
+        lines.add(line);
     }
 
-    public int addConstant(Constant constant) {
-        constants.add(constant);
-        return constants.size() - 1;
+    public void addConstant(Object value) {
+        constants.add(value);
     }
 
-    public void addFunction(String name, int offset) {
-        functionOffsets.put(name, offset);
+    public List<Byte> getCode() {
+        return new ArrayList<>(code);
     }
 
-    public void addGlobal(String name, int offset) {
-        globalOffsets.put(name, offset);
+    public List<Object> getConstants() {
+        return new ArrayList<>(constants);
+    }
+
+    public List<Integer> getLines() {
+        return new ArrayList<>(lines);
+    }
+
+    public int getCurrentOffset() {
+        return code.size();
+    }
+
+    public void patchJump(int offset, int jumpTo) {
+        code.set(offset, (byte)(jumpTo & 0xFF));
+        code.set(offset + 1, (byte)((jumpTo >> 8) & 0xFF));
+    }
+
+    public int getInstructionCount() {
+        return code.size();
     }
 
     public Instruction getInstruction(int index) {
-        if (index < 0 || index >= instructions.size()) {
-            throw new IndexOutOfBoundsException("Invalid instruction index: " + index);
+        if (index < 0 || index >= code.size()) {
+            throw new IndexOutOfBoundsException("Instruction index out of bounds: " + index);
         }
-        return instructions.get(index);
+        return Instruction.fromByte(code.get(index));
+    }
+
+    public Integer getFunctionOffset(String name) {
+        // Assuming there is a map or list that stores function names and their offsets
+        // This is a placeholder implementation
+        return functionOffsets.get(name);
     }
 
     public Constant getConstant(int index) {
         if (index < 0 || index >= constants.size()) {
-            throw new IndexOutOfBoundsException("Invalid constant index: " + index);
+            throw new IndexOutOfBoundsException("Constant index out of bounds: " + index);
         }
-        return constants.get(index);
-    }
-
-    public Integer getFunctionOffset(String name) {
-        return functionOffsets.get(name);
-    }
-
-    public Integer getGlobalOffset(String name) {
-        return globalOffsets.get(name);
-    }
-
-    public int getInstructionCount() {
-        return instructions.size();
-    }
-
-    public int getConstantCount() {
-        return constants.size();
-    }
-
-    public Set<String> getFunctionNames() {
-        return Collections.unmodifiableSet(functionOffsets.keySet());
-    }
-
-    public Set<String> getGlobalNames() {
-        return Collections.unmodifiableSet(globalOffsets.keySet());
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Constants:\n");
-        for (int i = 0; i < constants.size(); i++) {
-            sb.append(String.format("  %d: %s\n", i, constants.get(i)));
-        }
-        
-        sb.append("\nFunctions:\n");
-        for (Map.Entry<String, Integer> entry : functionOffsets.entrySet()) {
-            sb.append(String.format("  %s: %d\n", entry.getKey(), entry.getValue()));
-        }
-        
-        sb.append("\nGlobals:\n");
-        for (Map.Entry<String, Integer> entry : globalOffsets.entrySet()) {
-            sb.append(String.format("  %s: %d\n", entry.getKey(), entry.getValue()));
-        }
-        
-        sb.append("\nInstructions:\n");
-        for (int i = 0; i < instructions.size(); i++) {
-            sb.append(String.format("  %d: %s\n", i, instructions.get(i)));
-        }
-        
-        return sb.toString();
+        return (Constant) constants.get(index);
     }
 } 

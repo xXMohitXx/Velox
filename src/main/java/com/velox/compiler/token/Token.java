@@ -1,5 +1,8 @@
 package com.velox.compiler.token;
 
+/**
+ * Represents a lexical token in the Velox language.
+ */
 public class Token {
     private TokenType type;
     private String lexeme;
@@ -45,6 +48,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return String.format("%s %s %s", type, lexeme, literal != null ? literal : "");
+        return String.format("Token{type=%s, lexeme='%s', literal=%s, line=%d, column=%d}",
+                type, lexeme, literal, line, column);
     }
 } 
