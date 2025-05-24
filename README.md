@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Velox-logo.svg" alt="Velox Logo" />
+  <img src="Velox-logo.svg" alt="Velox Logo" width="100%" />
 </p>
 
 # Velox Programming Language
