@@ -17,6 +17,7 @@ public enum TokenType {
     PLUS_EQUAL, MINUS_EQUAL,
     STAR_EQUAL, SLASH_EQUAL,
     ARROW, DOUBLE_ARROW,
+    MINUS_MINUS, PLUS_PLUS,
 
     // Literals
     IDENTIFIER, NUMBER, TRUE, FALSE,
@@ -27,7 +28,7 @@ public enum TokenType {
     // Keywords - Class and Object
     CLASS, INTERFACE, ENUM, STRUCT,
     EXTENDS, IMPLEMENTS, NEW,
-    THIS, SUPER, STATIC, FINAL,
+    THIS, SUPER, STATIC, FINAL, ABSTRACT,
 
     // Keywords - Access Modifiers
     PUBLIC, PRIVATE, PROTECTED, INTERNAL,

@@ -4,7 +4,7 @@ import com.velox.compiler.token.Token;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassNode extends AST {
+public class ClassNode implements AST {
     private final String name;
     private final List<FieldNode> fields;
     private final List<MethodNode> methods;
@@ -12,7 +12,6 @@ public class ClassNode extends AST {
     private final boolean isPublic;
 
     public ClassNode(Token token, String name, boolean isPublic) {
-        super(token);
         this.name = name;
         this.fields = new ArrayList<>();
         this.methods = new ArrayList<>();
@@ -53,7 +52,7 @@ public class ClassNode extends AST {
     }
 
     @Override
-    public <R> R accept(ASTVisitor<R> visitor) {
+    public Object accept(ASTVisitor visitor) {
         return visitor.visitClass(this);
     }
 } 

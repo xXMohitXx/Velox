@@ -1,6 +1,7 @@
 package com.velox.compiler.ast;
 
 import com.velox.compiler.token.Token;
+import com.velox.compiler.ast.expressions.VariableExpr;
 import java.util.List;
 
 public class ClassStmt extends Stmt {
@@ -15,7 +16,7 @@ public class ClassStmt extends Stmt {
     }
 
     @Override
-    public <R> R accept(StmtVisitor<R> visitor) {
+    public Object accept(StmtVisitor visitor) {
         return visitor.visitClassStmt(this);
     }
 

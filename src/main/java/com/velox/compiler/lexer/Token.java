@@ -1,7 +1,9 @@
 package com.velox.compiler.lexer;
 
+import com.velox.compiler.token.TokenType;
+
 /**
- * Represents a lexical token in the Velox language.
+ * Represents a lexical token in the source code.
  */
 public class Token {
     private final TokenType type;

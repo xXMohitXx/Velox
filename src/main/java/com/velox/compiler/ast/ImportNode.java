@@ -1,25 +1,29 @@
 package com.velox.compiler.ast;
 
-import com.velox.compiler.token.Token;
+import com.velox.compiler.lexer.Token;
 
-public class ImportNode extends AST {
-    private final String moduleName;
-    private final String alias;
+/**
+ * Represents an import declaration in the AST.
+ */
+public class ImportNode implements AST {
+    private final Token moduleName;
+    private final Token alias;
 
-    public ImportNode(Token token, String moduleName, String alias) {
-        super(token);
+    public ImportNode(Token moduleName, Token alias) {
         this.moduleName = moduleName;
         this.alias = alias;
     }
 
-    @Override
-    public <R> R accept(ASTVisitor<R> visitor) {
-        if (visitor instanceof StmtVisitor) {
-            return ((StmtVisitor<R>) visitor).visitImport(this);
-        }
-        throw new UnsupportedOperationException("Visitor must implement StmtVisitor");
+    public Token getModuleName() {
+        return moduleName;
     }
 
-    public String getModuleName() { return moduleName; }
-    public String getAlias() { return alias; }
+    public Token getAlias() {
+        return alias;
+    }
+
+    @Override
+    public Object accept(ASTVisitor visitor) {
+        return visitor.visitImport(this);
+    }
 } 

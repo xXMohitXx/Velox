@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Represents the compiled bytecode for a Velox program
+ * Manages bytecode generation and storage.
  */
 public class Bytecode {
     private final List<Byte> code;
@@ -20,34 +20,61 @@ public class Bytecode {
         this.lines = new ArrayList<>();
     }
 
-    public void add(byte instruction, int line) {
-        code.add(instruction);
-        lines.add(line);
+    public void emit(OpCode opcode) {
+        code.add((byte) opcode.ordinal());
+        lines.add(0); // TODO: Add proper line tracking
     }
 
-    public void addConstant(Object value) {
-        constants.add(value);
+    public void emit(byte value) {
+        code.add(value);
+        lines.add(0);
     }
 
-    public List<Byte> getCode() {
-        return new ArrayList<>(code);
+    public void emit(OpCode opcode, Object value) {
+        emit(opcode);
+        if (value instanceof String) {
+            constants.add(value);
+            emit((byte) (constants.size() - 1));
+        } else if (value instanceof Number) {
+            constants.add(value);
+            emit((byte) (constants.size() - 1));
+        } else {
+            throw new IllegalArgumentException("Unsupported constant type: " + value.getClass());
+        }
     }
 
-    public List<Object> getConstants() {
-        return new ArrayList<>(constants);
+    public int emitJump(OpCode opcode) {
+        emit(opcode);
+        int jumpPos = code.size();
+        emit((byte) 0); // Placeholder for jump offset
+        return jumpPos;
     }
 
-    public List<Integer> getLines() {
-        return new ArrayList<>(lines);
+    public void patchJump(int jumpPos) {
+        int jumpOffset = code.size() - jumpPos - 1;
+        code.set(jumpPos, (byte) jumpOffset);
+    }
+
+    public void emitLoop(int loopStart) {
+        emit(OpCode.JUMP);
+        int jumpOffset = code.size() - loopStart;
+        emit((byte) jumpOffset);
     }
 
     public int getCurrentOffset() {
         return code.size();
     }
 
-    public void patchJump(int offset, int jumpTo) {
-        code.set(offset, (byte)(jumpTo & 0xFF));
-        code.set(offset + 1, (byte)((jumpTo >> 8) & 0xFF));
+    public List<Byte> getCode() {
+        return code;
+    }
+
+    public List<Object> getConstants() {
+        return constants;
+    }
+
+    public List<Integer> getLines() {
+        return lines;
     }
 
     public int getInstructionCount() {

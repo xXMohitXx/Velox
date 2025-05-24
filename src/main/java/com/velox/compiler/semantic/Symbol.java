@@ -1,33 +1,36 @@
 package com.velox.compiler.semantic;
 
-import com.velox.compiler.ast.TypeAnnotation;
+import com.velox.compiler.token.Token;
 
+/**
+ * Represents a symbol in the semantic analysis phase.
+ */
 public class Symbol {
-    private final String name;
-    private final TypeAnnotation type;
-    private final boolean isConst;
+    private final Token name;
+    private final Object type;
+    private final boolean isMutable;
 
-    public Symbol(String name, TypeAnnotation type, boolean isConst) {
+    public Symbol(Token name, Object type, boolean isMutable) {
         this.name = name;
         this.type = type;
-        this.isConst = isConst;
+        this.isMutable = isMutable;
     }
 
-    public String getName() {
+    public Token getName() {
         return name;
     }
 
-    public TypeAnnotation getType() {
+    public Object getType() {
         return type;
     }
 
-    public boolean isConst() {
-        return isConst;
+    public boolean isMutable() {
+        return isMutable;
     }
 
     @Override
     public String toString() {
-        return String.format("%s: %s%s", name, type != null ? type.getTypeName() : "inferred",
-            isConst ? " (const)" : "");
+        return String.format("%s: %s%s", name, type != null ? type.toString() : "inferred",
+            isMutable ? " (mutable)" : "");
     }
 } 

@@ -15,7 +15,7 @@ public class FunctionStmt extends Stmt {
     }
 
     @Override
-    public <R> R accept(StmtVisitor<R> visitor) {
+    public Object accept(StmtVisitor visitor) {
         return visitor.visitFunctionStmt(this);
     }
 

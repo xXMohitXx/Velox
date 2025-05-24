@@ -3,6 +3,9 @@ package com.velox.compiler.semantic;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a scope in the semantic analysis phase.
+ */
 public class Scope {
     private final Map<String, Symbol> symbols;
 
@@ -11,7 +14,7 @@ public class Scope {
     }
 
     public void define(Symbol symbol) {
-        symbols.put(symbol.getName(), symbol);
+        symbols.put(symbol.getName().getLexeme(), symbol);
     }
 
     public Symbol resolve(String name) {

@@ -4,7 +4,9 @@ import com.velox.compiler.token.Token;
 import com.velox.compiler.token.TokenType;
 import com.velox.compiler.error.LexicalError;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Lexer for the Velox language.
@@ -17,6 +19,34 @@ public class Lexer {
     private int start;
     private int line;
     private int column;
+    private final List<Token> tokens;
+    private static final Map<String, TokenType> keywords;
+
+    static {
+        keywords = new HashMap<>();
+        keywords.put("and", TokenType.AND);
+        keywords.put("class", TokenType.CLASS);
+        keywords.put("else", TokenType.ELSE);
+        keywords.put("false", TokenType.FALSE);
+        keywords.put("for", TokenType.FOR);
+        keywords.put("fun", TokenType.FUN);
+        keywords.put("if", TokenType.IF);
+        keywords.put("nil", TokenType.NIL);
+        keywords.put("or", TokenType.OR);
+        keywords.put("print", TokenType.PRINT);
+        keywords.put("return", TokenType.RETURN);
+        keywords.put("super", TokenType.SUPER);
+        keywords.put("this", TokenType.THIS);
+        keywords.put("true", TokenType.TRUE);
+        keywords.put("var", TokenType.VAR);
+        keywords.put("while", TokenType.WHILE);
+        keywords.put("public", TokenType.PUBLIC);
+        keywords.put("private", TokenType.PRIVATE);
+        keywords.put("protected", TokenType.PROTECTED);
+        keywords.put("static", TokenType.STATIC);
+        keywords.put("final", TokenType.FINAL);
+        keywords.put("abstract", TokenType.ABSTRACT);
+    }
 
     public Lexer() {
         this.stringInterner = new StringInterner();
@@ -24,6 +54,7 @@ public class Lexer {
         this.start = 0;
         this.line = 1;
         this.column = 1;
+        this.tokens = new ArrayList<>();
     }
 
     public Lexer(String source) {
@@ -33,6 +64,7 @@ public class Lexer {
         this.start = 0;
         this.line = 1;
         this.column = 1;
+        this.tokens = new ArrayList<>();
     }
 
     public List<Token> tokenize(String source) throws LexicalError {
@@ -42,14 +74,10 @@ public class Lexer {
         this.line = 1;
         this.column = 1;
 
-        List<Token> tokens = new ArrayList<>();
         while (!isAtEnd()) {
             start = current;
             try {
-                Token token = scanToken();
-                if (token != null) {
-                    tokens.add(token);
-                }
+                scanToken();
             } catch (Exception e) {
                 throw new LexicalError("Error at line " + line + ", column " + column + ": " + e.getMessage(), e);
             }
@@ -59,49 +87,57 @@ public class Lexer {
         return tokens;
     }
 
-    private Token scanToken() throws LexicalError {
+    private void scanToken() throws LexicalError {
         char c = advance();
         switch (c) {
-            case '(': return createToken(TokenType.LEFT_PAREN);
-            case ')': return createToken(TokenType.RIGHT_PAREN);
-            case '{': return createToken(TokenType.LEFT_BRACE);
-            case '}': return createToken(TokenType.RIGHT_BRACE);
-            case '[': return createToken(TokenType.LEFT_BRACKET);
-            case ']': return createToken(TokenType.RIGHT_BRACKET);
-            case ',': return createToken(TokenType.COMMA);
-            case '.': return createToken(TokenType.DOT);
-            case '-': return createToken(TokenType.MINUS);
-            case '+': return createToken(TokenType.PLUS);
-            case ';': return createToken(TokenType.SEMICOLON);
-            case '*': return createToken(TokenType.STAR);
-            case '!': return createToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
-            case '=': return createToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
-            case '<': return createToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
-            case '>': return createToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
+            case '(': addToken(TokenType.LEFT_PAREN); break;
+            case ')': addToken(TokenType.RIGHT_PAREN); break;
+            case '{': addToken(TokenType.LEFT_BRACE); break;
+            case '}': addToken(TokenType.RIGHT_BRACE); break;
+            case '[': addToken(TokenType.LEFT_BRACKET); break;
+            case ']': addToken(TokenType.RIGHT_BRACKET); break;
+            case ',': addToken(TokenType.COMMA); break;
+            case '.': addToken(TokenType.DOT); break;
+            case '-': addToken(match('-') ? TokenType.MINUS_MINUS : TokenType.MINUS); break;
+            case '+': addToken(match('+') ? TokenType.PLUS_PLUS : TokenType.PLUS); break;
+            case ';': addToken(TokenType.SEMICOLON); break;
+            case '*': addToken(TokenType.STAR); break;
+            case '?': addToken(TokenType.QUESTION); break;
+            case ':': addToken(TokenType.COLON); break;
+            case '!': addToken(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG); break;
+            case '=': addToken(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL); break;
+            case '<': addToken(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS); break;
+            case '>': addToken(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER); break;
             case '/':
                 if (match('/')) {
                     // Comment
                     while (peek() != '\n' && !isAtEnd()) advance();
-                    return null;
+                } else {
+                    addToken(TokenType.SLASH);
                 }
-                return createToken(TokenType.SLASH);
+                break;
             case ' ':
             case '\r':
             case '\t':
-                return null;
+                break;
             case '\n':
                 line++;
                 column = 1;
-                return null;
-            case '"': return string();
+                break;
+            case '"': string(); break;
             default:
-                if (isDigit(c)) return number();
-                if (isAlpha(c)) return identifier();
-                throw new LexicalError("Unexpected character: " + c);
+                if (isDigit(c)) {
+                    number();
+                } else if (isAlpha(c)) {
+                    identifier();
+                } else {
+                    throw new LexicalError("Unexpected character: " + c);
+                }
+                break;
         }
     }
 
-    private Token string() throws LexicalError {
+    private void string() throws LexicalError {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') {
                 line++;
@@ -117,10 +153,10 @@ public class Lexer {
         advance(); // The closing ".
 
         String value = source.substring(start + 1, current - 1);
-        return createToken(TokenType.STRING, stringInterner.intern(value));
+        addToken(TokenType.STRING, stringInterner.intern(value));
     }
 
-    private Token number() {
+    private void number() {
         while (isDigit(peek())) advance();
 
         if (peek() == '.' && isDigit(peekNext())) {
@@ -129,23 +165,21 @@ public class Lexer {
         }
 
         String value = source.substring(start, current);
-        return createToken(TokenType.NUMBER, Double.parseDouble(value));
+        addToken(TokenType.NUMBER, Double.parseDouble(value));
     }
 
-    private Token identifier() {
+    private void identifier() {
         while (isAlphaNumeric(peek())) advance();
 
         String text = source.substring(start, current);
-        TokenType type = Keywords.get(text);
+        TokenType type = keywords.get(text);
         if (type == null) type = TokenType.IDENTIFIER;
-
-        return createToken(type, stringInterner.intern(text));
+        addToken(type, stringInterner.intern(text));
     }
 
     private boolean match(char expected) {
         if (isAtEnd()) return false;
         if (source.charAt(current) != expected) return false;
-
         current++;
         column++;
         return true;
@@ -183,6 +217,15 @@ public class Lexer {
         current++;
         column++;
         return source.charAt(current - 1);
+    }
+
+    private void addToken(TokenType type) {
+        addToken(type, null);
+    }
+
+    private void addToken(TokenType type, Object literal) {
+        String text = source.substring(start, current);
+        tokens.add(new Token(type, stringInterner.intern(text), literal, line, column));
     }
 
     private Token createToken(TokenType type) {

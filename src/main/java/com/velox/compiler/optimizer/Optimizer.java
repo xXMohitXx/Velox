@@ -1,6 +1,8 @@
 package com.velox.compiler.optimizer;
 
 import com.velox.compiler.ast.*;
+import com.velox.compiler.ast.expressions.*;
+import com.velox.compiler.ast.statements.*;
 import java.util.*;
 
 public class Optimizer {

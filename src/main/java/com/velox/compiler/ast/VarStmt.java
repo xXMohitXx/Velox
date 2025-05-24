@@ -12,7 +12,7 @@ public class VarStmt extends Stmt {
     }
 
     @Override
-    public <R> R accept(StmtVisitor<R> visitor) {
+    public Object accept(StmtVisitor visitor) {
         return visitor.visitVarStmt(this);
     }
 

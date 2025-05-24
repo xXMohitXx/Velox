@@ -2,11 +2,10 @@ package com.velox.compiler.ast;
 
 import com.velox.compiler.token.Token;
 
-public class TypeAnnotation extends AST {
+public class TypeAnnotation implements AST {
     private final String typeName;
 
     public TypeAnnotation(Token token, String typeName) {
-        super(token);
         this.typeName = typeName;
     }
 
@@ -15,9 +14,9 @@ public class TypeAnnotation extends AST {
     }
 
     @Override
-    public <R> R accept(ASTVisitor<R> visitor) {
+    public Object accept(ASTVisitor visitor) {
         if (visitor instanceof StmtVisitor) {
-            return ((StmtVisitor<R>) visitor).visitTypeAnnotation(this);
+            return ((StmtVisitor) visitor).visitTypeAnnotation(this);
         }
         throw new UnsupportedOperationException("Visitor must implement StmtVisitor");
     }

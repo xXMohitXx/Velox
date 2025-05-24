@@ -45,5 +45,5 @@ public abstract class ASTNode {
         this.endColumn = endColumn;
     }
 
-    public abstract <R> R accept(ASTVisitor<R> visitor);
+    public abstract Object accept(ASTVisitor visitor);
 } 

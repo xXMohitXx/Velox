@@ -1,9 +1,9 @@
 package com.velox.compiler.error;
 
 /**
- * Exception thrown when a lexical error occurs during tokenization
+ * Represents an error that occurs during lexical analysis.
  */
-public class LexicalError extends CompilationError {
+public class LexicalError extends RuntimeException {
     public LexicalError(String message) {
         super(message);
     }

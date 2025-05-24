@@ -1,25 +1,45 @@
 package com.velox.compiler.ast;
 
-import com.velox.compiler.token.Token;
+import com.velox.compiler.lexer.Token;
 
-public class FieldNode extends AST {
-    private final String name;
+/**
+ * Represents a field declaration in the AST.
+ */
+public class FieldNode implements AST {
+    private final Token name;
+    private final AST type;
     private final AST initializer;
-    private final boolean isPublic;
+    private final Token accessModifier;
 
-    public FieldNode(Token token, String name, AST initializer, boolean isPublic) {
-        super(token);
+    public FieldNode(Token name, AST type, AST initializer, Token accessModifier) {
         this.name = name;
+        this.type = type;
         this.initializer = initializer;
-        this.isPublic = isPublic;
+        this.accessModifier = accessModifier;
+    }
+
+    public Token getName() {
+        return name;
+    }
+
+    public AST getType() {
+        return type;
+    }
+
+    public AST getInitializer() {
+        return initializer;
+    }
+
+    public Token getAccessModifier() {
+        return accessModifier;
+    }
+
+    public boolean isFinal() {
+        return accessModifier != null && accessModifier.getLexeme().equals("final");
     }
 
     @Override
-    public <R> R accept(ASTVisitor<R> visitor) {
+    public Object accept(ASTVisitor visitor) {
         return visitor.visitField(this);
     }
-
-    public String getName() { return name; }
-    public AST getInitializer() { return initializer; }
-    public boolean isPublic() { return isPublic; }
 } 

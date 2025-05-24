@@ -8,7 +8,7 @@ public class ExpressionStmt extends Stmt {
     }
 
     @Override
-    public <R> R accept(StmtVisitor<R> visitor) {
+    public Object accept(StmtVisitor visitor) {
         return visitor.visitExpressionStmt(this);
     }
 

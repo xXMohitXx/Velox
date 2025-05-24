@@ -2,7 +2,9 @@ package com.velox.compiler.parser;
 
 import com.velox.compiler.token.Token;
 import com.velox.compiler.token.TokenType;
-import com.velox.compiler.ast.*;
+import com.velox.compiler.ast.AST;
+import com.velox.compiler.ast.expressions.*;
+import com.velox.compiler.ast.statements.*;
 import com.velox.compiler.error.ParseError;
 import java.util.ArrayList;
 import java.util.List;

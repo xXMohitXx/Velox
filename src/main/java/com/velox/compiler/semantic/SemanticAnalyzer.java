@@ -1,9 +1,21 @@
 package com.velox.compiler.semantic;
 
-import com.velox.compiler.ast.*;
+import com.velox.compiler.ast.AST;
+import com.velox.compiler.ast.ClassNode;
+import com.velox.compiler.ast.ConstructorNode;
+import com.velox.compiler.ast.FieldNode;
+import com.velox.compiler.ast.ImportNode;
+import com.velox.compiler.ast.MethodNode;
+import com.velox.compiler.ast.ModuleNode;
+import com.velox.compiler.ast.statements.IfStmt;
+import com.velox.compiler.ast.statements.ReturnStmt;
+import com.velox.compiler.ast.statements.WhileStmt;
 import com.velox.compiler.error.ErrorHandler;
 import java.util.*;
 
+/**
+ * Performs semantic analysis on the AST.
+ */
 public class SemanticAnalyzer {
     private final ErrorHandler errorHandler;
     private final Stack<Scope> scopes;
@@ -72,7 +84,7 @@ public class SemanticAnalyzer {
 
     private void analyzeField(FieldNode field) {
         // Add to current scope
-        Symbol symbol = new Symbol(field.getName(), null, false);
+        Symbol symbol = new Symbol(field.getName(), field.getType(), !field.isFinal());
         defineSymbol(symbol);
     }
 
@@ -81,8 +93,10 @@ public class SemanticAnalyzer {
         try {
             // TODO: Implement parameter analysis
             // Analyze body
-            for (AST statement : method.getBody()) {
-                analyzeStatement(statement);
+            if (method.getBody() instanceof List) {
+                for (AST statement : (List<AST>) method.getBody()) {
+                    analyzeStatement(statement);
+                }
             }
         } finally {
             exitScope();
@@ -94,8 +108,10 @@ public class SemanticAnalyzer {
         try {
             // TODO: Implement parameter analysis
             // Analyze body
-            for (AST statement : constructor.getBody()) {
-                analyzeStatement(statement);
+            if (constructor.getBody() instanceof List) {
+                for (AST statement : (List<AST>) constructor.getBody()) {
+                    analyzeStatement(statement);
+                }
             }
         } finally {
             exitScope();
