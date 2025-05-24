@@ -1,7 +1,6 @@
 <p align="center">
-  <img src="Velox-logo.svg" alt="Velox Logo" width="300"/>
+  <img src="Velox-logo.svg" alt="Velox Logo" />
 </p>
-### Logo design by [Me](https://github.com/xXMohitXx)
 
 # Velox Programming Language
 
