@@ -18,20 +18,56 @@ The lexer tokenizes source code into a stream of tokens.
 
 ```velox
 enum TokenType {
-    // Keywords
-    MODULE, IMPORT, EXPORT, FUNCTION, CLASS,
-    IF, ELSE, WHILE, FOR, RETURN, BREAK, CONTINUE,
+    // Module and Import Keywords
+    MODULE, IMPORT, EXPORT,
+    
+    // Class and Object Keywords
+    CLASS, INTERFACE, EXTENDS, IMPLEMENTS,
+    SUPER, THIS, NEW, STATIC,
+    
+    // Access Modifiers
+    PUBLIC, PRIVATE, PROTECTED, INTERNAL,
+    
+    // Functions
+    FUN, RETURN, VOID,
+    
+    // Control Flow
+    IF, ELSE, WHILE, FOR, DO,
+    BREAK, CONTINUE, SWITCH, CASE, DEFAULT,
+    
+    // Error Handling
+    TRY, CATCH, FINALLY, THROW,
+    
+    // Variable Declaration
+    VAR, LET, CONST,
+    
+    // Type System
+    TYPE, INTERFACE, ENUM, STRUCT,
+    STRING, NUMBER, BOOLEAN, CHAR,
+    ARRAY, MAP, SET, TUPLE,
+    
+    // Logical Operators
+    AND, OR, NOT,
+    
+    // Built-in Functions
+    PRINT, READ, WRITE,
     
     // Literals
-    IDENTIFIER, STRING, NUMBER, BOOLEAN,
+    IDENTIFIER, NUMBER, TRUE, FALSE,
     
     // Operators
-    PLUS, MINUS, MULTIPLY, DIVIDE, MODULO,
-    EQUAL, NOT_EQUAL, GREATER, LESS, GREATER_EQUAL, LESS_EQUAL,
+    PLUS, MINUS, STAR, SLASH,
+    EQUAL, EQUAL_EQUAL, BANG, BANG_EQUAL,
+    GREATER, GREATER_EQUAL, LESS, LESS_EQUAL,
     
     // Punctuation
-    LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
-    LEFT_BRACKET, RIGHT_BRACKET, SEMICOLON, COMMA, DOT
+    LEFT_PAREN, RIGHT_PAREN,
+    LEFT_BRACE, RIGHT_BRACE,
+    LEFT_BRACKET, RIGHT_BRACKET,
+    SEMICOLON, COMMA, DOT, COLON,
+    
+    // Special
+    EOF
 }
 ```
 
@@ -57,25 +93,72 @@ The parser converts tokens into an Abstract Syntax Tree (AST).
 ### AST Node Types
 
 ```velox
-interface AstNode {
-    function accept(visitor: AstVisitor): any;
+interface AST {
+    function accept(visitor: ASTVisitor): any;
 }
 
-class ModuleNode implements AstNode {
-    private declarations: AstNode[];
+class ModuleNode implements AST {
+    private imports: ImportNode[];
+    private declarations: AST[];
     
-    function accept(visitor: AstVisitor): any {
+    function accept(visitor: ASTVisitor): any {
         return visitor.visitModule(this);
     }
 }
 
-class FunctionNode implements AstNode {
+class ClassNode implements AST {
     private name: string;
+    private superclass: string;
+    private interfaces: string[];
+    private fields: FieldNode[];
+    private methods: MethodNode[];
+    private constructor: ConstructorNode;
+    
+    function accept(visitor: ASTVisitor): any {
+        return visitor.visitClass(this);
+    }
+}
+
+class FunctionNode implements AST {
+    private name: string;
+    private parameters: ParameterNode[];
+    private returnType: TypeNode;
+    private body: BlockNode;
+    
+    function accept(visitor: ASTVisitor): any {
+        return visitor.visitFunction(this);
+    }
+}
+
+class MethodNode implements AST {
+    private name: string;
+    private parameters: ParameterNode[];
+    private returnType: TypeNode;
+    private body: BlockNode;
+    private isStatic: boolean;
+    
+    function accept(visitor: ASTVisitor): any {
+        return visitor.visitMethod(this);
+    }
+}
+
+class FieldNode implements AST {
+    private name: string;
+    private type: TypeNode;
+    private initializer: AST;
+    private isStatic: boolean;
+    
+    function accept(visitor: ASTVisitor): any {
+        return visitor.visitField(this);
+    }
+}
+
+class ConstructorNode implements AST {
     private parameters: ParameterNode[];
     private body: BlockNode;
     
-    function accept(visitor: AstVisitor): any {
-        return visitor.visitFunction(this);
+    function accept(visitor: ASTVisitor): any {
+        return visitor.visitConstructor(this);
     }
 }
 ```
@@ -167,6 +250,34 @@ enum OpCode {
     
     // Variable operations
     LOAD, STORE, GET_PROPERTY, SET_PROPERTY
+}
+```
+
+### Function Calls
+
+The CALL instruction handles function invocation in the bytecode:
+
+```velox
+class CallInstruction implements Instruction {
+    private argumentCount: int;
+
+    function execute(vm: VirtualMachine): void {
+        // Pop function name from stack
+        let function = vm.pop();
+        
+        // Pop arguments from stack
+        let args = new Array[argumentCount];
+        for (let i = argumentCount - 1; i >= 0; i--) {
+            args[i] = vm.pop();
+        }
+        
+        // Call the function
+        if (function instanceof String) {
+            vm.callFunction(function, args);
+        } else {
+            throw new RuntimeException("Invalid function object");
+        }
+    }
 }
 ```
 

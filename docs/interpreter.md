@@ -10,24 +10,38 @@ The Velox interpreter executes bytecode in a virtual machine environment. It pro
 
 ```velox
 class VirtualMachine {
-    private stack: Value[];
-    private heap: map<int, Value>;
-    private globals: map<string, Value>;
-    
-    function push(value: Value): void {
-        this.stack.push(value);
-    }
-    
-    function pop(): Value {
-        return this.stack.pop();
-    }
-    
-    function allocate(size: int): int {
-        // Allocate memory on the heap
-    }
-    
-    function deallocate(address: int): void {
-        // Free memory from the heap
+    private final Bytecode bytecode;
+    private final Stack<Object> stack;
+    private final Stack<CallFrame> callStack;
+    private int programCounter;
+    private boolean running;
+    private boolean debugMode;
+    private PrintStream debugOutput;
+    private Map<String, Object> globals;
+    private List<RuntimeError> errors;
+
+    function execute(): void {
+        running = true;
+        programCounter = 0;
+        errors.clear();
+
+        while (running && programCounter < bytecode.getInstructionCount()) {
+            if (debugMode) {
+                debugOutput.println("PC: " + programCounter);
+                debugOutput.println("Stack: " + stack);
+                debugOutput.println("Call Stack: " + callStack.size());
+            }
+
+            try {
+                let instruction = bytecode.getInstruction(programCounter++);
+                instruction.execute(this);
+            } catch (RuntimeException e) {
+                handleError(new RuntimeError(e.getMessage(), programCounter - 1));
+                if (!debugMode) {
+                    throw e;
+                }
+            }
+        }
     }
 }
 ```
@@ -61,6 +75,54 @@ class ObjectValue implements Value {
     
     function getType(): ValueType {
         return ValueType.OBJECT;
+    }
+}
+```
+
+### Function Calls
+
+The Virtual Machine handles function calls through the `callFunction` method:
+
+```velox
+class VirtualMachine {
+    // ... existing code ...
+
+    function callFunction(name: string, args: Value[]): void {
+        // Get function offset from bytecode
+        let offset = this.bytecode.getFunctionOffset(name);
+        if (offset == null) {
+            throw new RuntimeException("Function not found: " + name);
+        }
+
+        // Save current state
+        this.callStack.push(new CallFrame(this.programCounter, args.length, this.stack.size() - args.length));
+
+        // Set up arguments as locals
+        for (let i = 0; i < args.length; i++) {
+            this.setLocal(i, args[i]);
+        }
+
+        // Jump to function
+        this.programCounter = offset;
+    }
+
+    function returnFromFunction(result: Value): void {
+        if (this.callStack.isEmpty()) {
+            throw new RuntimeException("No active function call");
+        }
+
+        let frame = this.callStack.pop();
+        this.programCounter = frame.getReturnAddress();
+        
+        // Clear stack up to base pointer
+        while (this.stack.size() > frame.getBasePointer()) {
+            this.stack.pop();
+        }
+        
+        // Push result
+        if (result != null) {
+            this.stack.push(result);
+        }
     }
 }
 ```
@@ -177,25 +239,75 @@ class ExceptionHandler {
 
 ```velox
 class PythonBridge {
-    private interpreter: Interpreter;
-    
-    function callPythonFunction(name: string, args: Value[]): Value {
-        // Convert Velox values to Python objects
-        let pyArgs = this.convertToPython(args);
-        
-        // Call Python function
-        let result = this.callPython(name, pyArgs);
-        
-        // Convert result back to Velox value
-        return this.convertFromPython(result);
+    private static final PythonInterpreter interpreter = new PythonInterpreter();
+    private static final Map<String, PyObject> importedModules = new HashMap<>();
+
+    function importModule(moduleName: string): PyObject {
+        if (importedModules.containsKey(moduleName)) {
+            return importedModules.get(moduleName);
+        }
+
+        try {
+            let module = interpreter.get(moduleName);
+            if (module == null) {
+                interpreter.exec("import " + moduleName);
+                module = interpreter.get(moduleName);
+            }
+            importedModules.put(moduleName, module);
+            return module;
+        } catch (PyException e) {
+            throw new RuntimeException("Failed to import Python module: " + moduleName, e);
+        }
     }
-    
-    private function convertToPython(value: Value): any {
-        // Convert Velox value to Python object
+
+    function callFunction(moduleName: string, functionName: string, args: Object[]): Object {
+        let module = importModule(moduleName);
+        let function = module.__getattr__(functionName);
+        
+        let pyArgs = new PyObject[args.length];
+        for (let i = 0; i < args.length; i++) {
+            pyArgs[i] = Py.java2py(args[i]);
+        }
+        
+        try {
+            let result = function.__call__(pyArgs);
+            return result.__tojava__(Object.class);
+        } catch (PyException e) {
+            throw new RuntimeException("Failed to call Python function: " + functionName, e);
+        }
     }
-    
-    private function convertFromPython(value: any): Value {
-        // Convert Python object to Velox value
+}
+
+class DataStructureBridge {
+    function toPythonStructure(obj: Object): PyObject {
+        if (obj == null) {
+            return Py.None;
+        }
+        
+        if (obj instanceof Map) {
+            return toPythonDict((Map<?, ?>) obj);
+        } else if (obj instanceof List) {
+            return toPythonList((List<?>) obj);
+        } else if (obj instanceof Set) {
+            return toPythonSet((Set<?>) obj);
+        } else if (obj instanceof Number) {
+            return Py.java2py(obj);
+        } else if (obj instanceof String) {
+            return new PyString((String) obj);
+        } else if (obj instanceof Boolean) {
+            return Py.java2py(obj);
+        } else if (obj.getClass().isArray()) {
+            return toPythonArray(obj);
+        }
+        
+        throw new IllegalArgumentException("Unsupported data structure type: " + obj.getClass());
+    }
+
+    function toVeloxStructure(obj: Object): Object {
+        if (obj instanceof PyObject) {
+            return toVeloxStructure((PyObject) obj);
+        }
+        return obj;
     }
 }
 ```
