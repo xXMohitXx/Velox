@@ -2,7 +2,7 @@ package com.velox.compiler.ast;
 
 import com.velox.compiler.token.Token;
 
-public abstract class ASTNode {
+public abstract class ASTNode implements AST {
     private final Token token;
     private int startLine;
     private int startColumn;
@@ -17,18 +17,22 @@ public abstract class ASTNode {
         }
     }
 
+    @Override
     public Token getToken() {
         return token;
     }
 
+    @Override
     public int getStartLine() {
         return startLine;
     }
 
+    @Override
     public int getStartColumn() {
         return startColumn;
     }
 
+    @Override
     public int getEndLine() {
         return endLine;
     }
@@ -37,6 +41,7 @@ public abstract class ASTNode {
         this.endLine = endLine;
     }
 
+    @Override
     public int getEndColumn() {
         return endColumn;
     }

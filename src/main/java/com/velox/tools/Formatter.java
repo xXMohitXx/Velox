@@ -1,8 +1,8 @@
 package com.velox.tools;
 
 import com.velox.compiler.lexer.Lexer;
-import com.velox.compiler.lexer.Token;
-import com.velox.compiler.lexer.TokenType;
+import com.velox.compiler.token.Token;
+import com.velox.compiler.token.TokenType;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -21,7 +21,7 @@ public class Formatter {
     
     public String format(String source) {
         Lexer lexer = new Lexer(source);
-        List<Token> tokens = lexer.scanTokens();
+        List<Token> tokens = lexer.tokenize(source);
         return formatTokens(tokens);
     }
     
@@ -82,7 +82,7 @@ public class Formatter {
                     result.append(".");
                     needSpace = false;
                 }
-                case MODULE, IMPORT, EXPORT, FUNCTION, CLASS, IF, ELSE, WHILE, FOR, RETURN, BREAK, CONTINUE -> {
+                case MODULE, IMPORT, EXPORT, FUN, CLASS, IF, ELSE, WHILE, FOR, RETURN, BREAK, CONTINUE -> {
                     if (needNewline) {
                         result.append("\n").append(" ".repeat(currentIndent));
                     }

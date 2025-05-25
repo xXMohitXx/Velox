@@ -1,15 +1,16 @@
 package com.velox.compiler.ast;
 
-import com.velox.compiler.lexer.Token;
+import com.velox.compiler.token.Token;
 
 /**
  * Represents an import declaration in the AST.
  */
-public class ImportNode implements AST {
+public class ImportNode extends ASTNode {
     private final Token moduleName;
     private final Token alias;
 
-    public ImportNode(Token moduleName, Token alias) {
+    public ImportNode(Token token, Token moduleName, Token alias) {
+        super(token);
         this.moduleName = moduleName;
         this.alias = alias;
     }

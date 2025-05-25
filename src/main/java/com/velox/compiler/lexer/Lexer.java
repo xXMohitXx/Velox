@@ -73,6 +73,7 @@ public class Lexer {
         this.start = 0;
         this.line = 1;
         this.column = 1;
+        this.tokens.clear();
 
         while (!isAtEnd()) {
             start = current;

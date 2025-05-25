@@ -1,17 +1,18 @@
 package com.velox.compiler.ast;
 
-import com.velox.compiler.lexer.Token;
+import com.velox.compiler.token.Token;
 
 /**
  * Represents a field declaration in the AST.
  */
-public class FieldNode implements AST {
+public class FieldNode extends ASTNode {
     private final Token name;
     private final AST type;
     private final AST initializer;
     private final Token accessModifier;
 
-    public FieldNode(Token name, AST type, AST initializer, Token accessModifier) {
+    public FieldNode(Token token, Token name, AST type, AST initializer, Token accessModifier) {
+        super(token);
         this.name = name;
         this.type = type;
         this.initializer = initializer;

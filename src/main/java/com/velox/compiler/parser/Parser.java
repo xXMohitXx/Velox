@@ -3,8 +3,8 @@ package com.velox.compiler.parser;
 import com.velox.compiler.token.Token;
 import com.velox.compiler.token.TokenType;
 import com.velox.compiler.ast.AST;
+import com.velox.compiler.ast.Expression;
 import com.velox.compiler.ast.expressions.*;
-import com.velox.compiler.ast.statements.*;
 import com.velox.compiler.error.ParseError;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class Parser {
 
             if (expr instanceof VariableExpr) {
                 Token name = ((VariableExpr) expr).getToken();
-                return new AssignExpr(name, value);
+                return new AssignExpr(name, (Expression)value);
             } else if (expr instanceof GetExpr) {
                 GetExpr get = (GetExpr) expr;
                 return new SetExpr(get.getObject(), get.getToken(), value);
@@ -60,7 +60,7 @@ public class Parser {
         while (match(TokenType.OR)) {
             Token operator = previous();
             AST right = and();
-            expr = new BinaryExpr(expr, operator, right);
+            expr = new BinaryExpr(operator, expr, right);
         }
 
         return expr;
@@ -72,7 +72,7 @@ public class Parser {
         while (match(TokenType.AND)) {
             Token operator = previous();
             AST right = equality();
-            expr = new BinaryExpr(expr, operator, right);
+            expr = new BinaryExpr(operator, expr, right);
         }
 
         return expr;
@@ -84,7 +84,7 @@ public class Parser {
         while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
             Token operator = previous();
             AST right = comparison();
-            expr = new BinaryExpr(expr, operator, right);
+            expr = new BinaryExpr(operator, expr, right);
         }
 
         return expr;
@@ -96,7 +96,7 @@ public class Parser {
         while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
             Token operator = previous();
             AST right = term();
-            expr = new BinaryExpr(expr, operator, right);
+            expr = new BinaryExpr(operator, expr, right);
         }
 
         return expr;
@@ -108,7 +108,7 @@ public class Parser {
         while (match(TokenType.MINUS, TokenType.PLUS)) {
             Token operator = previous();
             AST right = factor();
-            expr = new BinaryExpr(expr, operator, right);
+            expr = new BinaryExpr(operator, expr, right);
         }
 
         return expr;
@@ -120,7 +120,7 @@ public class Parser {
         while (match(TokenType.SLASH, TokenType.STAR)) {
             Token operator = previous();
             AST right = unary();
-            expr = new BinaryExpr(expr, operator, right);
+            expr = new BinaryExpr(operator, expr, right);
         }
 
         return expr;
@@ -144,7 +144,7 @@ public class Parser {
                 expr = finishCall(expr);
             } else if (match(TokenType.DOT)) {
                 Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
-                expr = new GetExpr(expr, name);
+                expr = new GetExpr((Expression)expr, name);
             } else {
                 break;
             }
@@ -166,12 +166,12 @@ public class Parser {
     }
 
     private AST primary() throws ParseError {
-        if (match(TokenType.FALSE)) return new LiteralExpr(false);
-        if (match(TokenType.TRUE)) return new LiteralExpr(true);
-        if (match(TokenType.NIL)) return new LiteralExpr(null);
+        if (match(TokenType.FALSE)) return new LiteralExpr(previous(), false);
+        if (match(TokenType.TRUE)) return new LiteralExpr(previous(), true);
+        if (match(TokenType.NIL)) return new LiteralExpr(previous(), null);
 
         if (match(TokenType.NUMBER, TokenType.STRING)) {
-            return new LiteralExpr(previous().getLiteral());
+            return new LiteralExpr(previous(), previous().getLiteral());
         }
 
         if (match(TokenType.THIS)) return new ThisExpr(previous());
@@ -183,7 +183,7 @@ public class Parser {
         if (match(TokenType.LEFT_PAREN)) {
             AST expr = expression();
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
-            return new GroupingExpr(expr);
+            return new GroupingExpr(previous(), expr);
         }
 
         throw new ParseError("Expect expression.", peek());

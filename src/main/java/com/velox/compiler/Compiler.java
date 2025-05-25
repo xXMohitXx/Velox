@@ -5,14 +5,16 @@ import com.velox.compiler.parser.Parser;
 import com.velox.compiler.semantic.SemanticAnalyzer;
 import com.velox.compiler.codegen.CodeGenerator;
 import com.velox.compiler.optimizer.Optimizer;
-import com.velox.compiler.ast.AST;
+import com.velox.compiler.ast.ModuleNode;
 import com.velox.compiler.bytecode.Bytecode;
 import com.velox.compiler.error.CompilationError;
 import com.velox.compiler.error.ErrorHandler;
+import com.velox.compiler.token.Token;
+import com.velox.compiler.util.PerformanceMetrics;
+import java.util.List;
 
 public class Compiler {
     private final Lexer lexer;
-    private final Parser parser;
     private final SemanticAnalyzer semanticAnalyzer;
     private final CodeGenerator codeGenerator;
     private final Optimizer optimizer;
@@ -20,12 +22,11 @@ public class Compiler {
     private final PerformanceMonitor performanceMonitor;
 
     public Compiler() {
+        this.errorHandler = new ErrorHandler();
         this.lexer = new Lexer();
-        this.parser = new Parser();
-        this.semanticAnalyzer = new SemanticAnalyzer();
+        this.semanticAnalyzer = new SemanticAnalyzer(errorHandler);
         this.codeGenerator = new CodeGenerator();
         this.optimizer = new Optimizer();
-        this.errorHandler = new ErrorHandler();
         this.performanceMonitor = new PerformanceMonitor();
     }
 
@@ -35,37 +36,38 @@ public class Compiler {
             performanceMonitor.startPhase("lexical_analysis");
             
             // Lexical Analysis
-            var tokens = lexer.tokenize(source);
+            List<Token> tokens = lexer.tokenize(source);
             performanceMonitor.endPhase("lexical_analysis");
 
             // Syntax Analysis
             performanceMonitor.startPhase("syntax_analysis");
-            var ast = parser.parse(tokens);
+            Parser parser = new Parser(tokens);
+            ModuleNode ast = (ModuleNode) parser.parse();
             performanceMonitor.endPhase("syntax_analysis");
 
             // Semantic Analysis
             performanceMonitor.startPhase("semantic_analysis");
-            var typeInfo = semanticAnalyzer.analyze(ast);
+            semanticAnalyzer.analyze(ast);
             performanceMonitor.endPhase("semantic_analysis");
 
             // Code Generation
             performanceMonitor.startPhase("code_generation");
-            var bytecode = codeGenerator.generate(ast, typeInfo);
+            Bytecode bytecode = codeGenerator.generate(ast);
             performanceMonitor.endPhase("code_generation");
 
             // Optimization
             performanceMonitor.startPhase("optimization");
-            var optimizedBytecode = optimizer.optimize(bytecode);
+            Bytecode optimizedBytecode = optimizer.optimize(bytecode);
             performanceMonitor.endPhase("optimization");
 
             return optimizedBytecode;
         } catch (Exception e) {
-            errorHandler.handleError(e);
+            errorHandler.handleError(new CompilationError("Compilation failed", e));
             throw new CompilationError("Compilation failed", e);
         }
     }
 
-    public void setOptimizationLevel(OptimizationLevel level) {
+    public void setOptimizationLevel(int level) {
         optimizer.setLevel(level);
     }
 

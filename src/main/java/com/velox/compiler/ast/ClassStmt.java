@@ -4,20 +4,24 @@ import com.velox.compiler.token.Token;
 import com.velox.compiler.ast.expressions.VariableExpr;
 import java.util.List;
 
-public class ClassStmt extends Stmt {
+public class ClassStmt extends ASTNode {
     private final Token name;
     private final VariableExpr superclass;
     private final List<FunctionStmt> methods;
 
-    public ClassStmt(Token name, VariableExpr superclass, List<FunctionStmt> methods) {
+    public ClassStmt(Token token, Token name, VariableExpr superclass, List<FunctionStmt> methods) {
+        super(token);
         this.name = name;
         this.superclass = superclass;
         this.methods = methods;
     }
 
     @Override
-    public Object accept(StmtVisitor visitor) {
-        return visitor.visitClassStmt(this);
+    public Object accept(ASTVisitor visitor) {
+        if (visitor instanceof StmtVisitor) {
+            return ((StmtVisitor) visitor).visitClassStmt(this);
+        }
+        throw new UnsupportedOperationException("Visitor must implement StmtVisitor");
     }
 
     public Token getName() { return name; }

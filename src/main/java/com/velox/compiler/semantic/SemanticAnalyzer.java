@@ -93,8 +93,11 @@ public class SemanticAnalyzer {
         try {
             // TODO: Implement parameter analysis
             // Analyze body
-            if (method.getBody() instanceof List) {
-                for (AST statement : (List<AST>) method.getBody()) {
+            Object body = method.getBody();
+            if (body instanceof List<?>) {
+                @SuppressWarnings("unchecked")
+                List<AST> statements = (List<AST>) body;
+                for (AST statement : statements) {
                     analyzeStatement(statement);
                 }
             }

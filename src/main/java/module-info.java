@@ -1,4 +1,8 @@
 module com.velox.compiler {
+    requires org.python.core;
+    requires org.python.util;
+    requires jakarta.json;
+    
     exports com.velox.compiler.ast;
     exports com.velox.compiler.ast.expressions;
     exports com.velox.compiler.ast.statements;
@@ -13,4 +17,5 @@ module com.velox.compiler {
     exports com.velox.compiler.semantic;
     exports com.velox.compiler.token;
     exports com.velox.compiler.util;
+    exports com.velox.std;
 } 

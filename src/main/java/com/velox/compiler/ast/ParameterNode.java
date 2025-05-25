@@ -1,10 +1,13 @@
 package com.velox.compiler.ast;
 
-public class ParameterNode implements AST {
+import com.velox.compiler.token.Token;
+
+public class ParameterNode extends ASTNode {
     private final String name;
     private final String type;
 
-    public ParameterNode(String name, String type) {
+    public ParameterNode(Token token, String name, String type) {
+        super(token);
         this.name = name;
         this.type = type;
     }

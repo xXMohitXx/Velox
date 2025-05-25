@@ -2,10 +2,11 @@ package com.velox.compiler.ast;
 
 import com.velox.compiler.token.Token;
 
-public class TypeAnnotation implements AST {
+public class TypeAnnotation extends ASTNode {
     private final String typeName;
 
     public TypeAnnotation(Token token, String typeName) {
+        super(token);
         this.typeName = typeName;
     }
 

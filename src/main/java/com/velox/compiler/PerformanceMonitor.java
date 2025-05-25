@@ -1,5 +1,6 @@
 package com.velox.compiler;
 
+import com.velox.compiler.util.PerformanceMetrics;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,22 +31,18 @@ public class PerformanceMonitor {
     }
 
     public PerformanceMetrics getMetrics() {
-        return new PerformanceMetrics(phaseDurations);
-    }
+        Map<String, Double> averages = new HashMap<>();
+        Map<String, Long> totals = new HashMap<>();
+        Map<String, Long> maximums = new HashMap<>();
 
-    public static class PerformanceMetrics {
-        private final Map<String, Long> phaseDurations;
-
-        public PerformanceMetrics(Map<String, Long> phaseDurations) {
-            this.phaseDurations = new HashMap<>(phaseDurations);
+        for (Map.Entry<String, Long> entry : phaseDurations.entrySet()) {
+            String phase = entry.getKey();
+            long duration = entry.getValue();
+            averages.put(phase, (double) duration);
+            totals.put(phase, duration);
+            maximums.put(phase, duration);
         }
 
-        public long getPhaseDuration(String phaseName) {
-            return phaseDurations.getOrDefault(phaseName, 0L);
-        }
-
-        public Map<String, Long> getAllPhaseDurations() {
-            return new HashMap<>(phaseDurations);
-        }
+        return new PerformanceMetrics(averages, totals, maximums);
     }
 } 

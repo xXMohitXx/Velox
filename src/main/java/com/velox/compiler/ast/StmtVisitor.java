@@ -1,18 +1,19 @@
 package com.velox.compiler.ast;
 
-import com.velox.compiler.ast.statements.IfStmt;
-import com.velox.compiler.ast.statements.ReturnStmt;
+import com.velox.compiler.ast.statements.*;
 
 public interface StmtVisitor extends ASTVisitor {
-    Object visitExpressionStmt(ExpressionStmt stmt);
-    Object visitPrintStmt(PrintStmt stmt);
-    Object visitVarStmt(VarStmt stmt);
-    Object visitBlockStmt(com.velox.compiler.ast.statements.BlockStmt stmt);
-    Object visitIfStmt(IfStmt stmt);
-    Object visitWhileStmt(com.velox.compiler.ast.statements.WhileStmt stmt);
-    Object visitFunctionStmt(FunctionStmt stmt);
-    Object visitReturnStmt(ReturnStmt stmt);
+    Object visitBlockStmt(BlockStmt stmt);
     Object visitClassStmt(ClassStmt stmt);
+    Object visitExpressionStmt(ExpressionStmt stmt);
+    Object visitFunctionStmt(FunctionStmt stmt);
+    Object visitIfStmt(IfStmt stmt);
+    Object visitModuleNode(ModuleNode node);
+    Object visitParameter(Parameter param);
+    Object visitPrintStmt(com.velox.compiler.ast.statements.PrintStmt stmt);
+    Object visitReturnStmt(ReturnStmt stmt);
+    Object visitVarStmt(VarStmt stmt);
+    Object visitWhileStmt(WhileStmt stmt);
     Object visitModule(ModuleNode node);
     Object visitImport(ImportNode node);
     Object visitTypeAnnotation(TypeAnnotation type);

@@ -1,19 +1,20 @@
 package com.velox.compiler.ast;
 
-import com.velox.compiler.lexer.Token;
+import com.velox.compiler.token.Token;
 import java.util.List;
 
 /**
  * Represents a method declaration in the AST.
  */
-public class MethodNode implements AST {
+public class MethodNode extends ASTNode {
     private final Token name;
     private final List<AST> parameters;
     private final AST returnType;
     private final AST body;
     private final Token accessModifier;
 
-    public MethodNode(Token name, List<AST> parameters, AST returnType, AST body, Token accessModifier) {
+    public MethodNode(Token token, Token name, List<AST> parameters, AST returnType, AST body, Token accessModifier) {
+        super(token);
         this.name = name;
         this.parameters = parameters;
         this.returnType = returnType;

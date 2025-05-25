@@ -1,108 +1,80 @@
 package com.velox.compiler.python;
 
-import org.python.core.*;
-import org.python.util.PythonInterpreter;
+import com.velox.compiler.error.RuntimeError;
 import java.util.Map;
 import java.util.HashMap;
 
-/**
- * Bridge class for Python interoperability in Velox.
- * Handles Python library imports and function calls.
- */
 public class PythonBridge {
-    private static final PythonInterpreter interpreter = new PythonInterpreter();
-    private static final Map<String, PyObject> importedModules = new HashMap<>();
+    private static final Map<String, Object> moduleCache = new HashMap<>();
+    private static boolean isInitialized = false;
 
-    /**
-     * Import a Python module
-     * @param moduleName The name of the Python module to import
-     * @return The imported module as a PyObject
-     */
-    public static PyObject importModule(String moduleName) {
-        if (importedModules.containsKey(moduleName)) {
-            return importedModules.get(moduleName);
-        }
-
-        try {
-            PyObject module = interpreter.get(moduleName);
-            if (module == null) {
-                interpreter.exec("import " + moduleName);
-                module = interpreter.get(moduleName);
+    public static void initialize() {
+        if (!isInitialized) {
+            try {
+                System.loadLibrary("python3");
+                isInitialized = true;
+            } catch (UnsatisfiedLinkError e) {
+                throw new RuntimeError("Failed to initialize Python interpreter", e);
             }
-            importedModules.put(moduleName, module);
-            return module;
-        } catch (PyException e) {
-            throw new RuntimeException("Failed to import Python module: " + moduleName, e);
         }
     }
 
-    /**
-     * Call a Python function
-     * @param moduleName The name of the module containing the function
-     * @param functionName The name of the function to call
-     * @param args The arguments to pass to the function
-     * @return The result of the function call
-     */
-    public static Object callFunction(String moduleName, String functionName, Object... args) {
-        PyObject module = importModule(moduleName);
-        PyObject function = module.__getattr__(functionName);
-        
-        PyObject[] pyArgs = new PyObject[args.length];
-        for (int i = 0; i < args.length; i++) {
-            pyArgs[i] = Py.java2py(args[i]);
+    public static Object importModule(String moduleName) {
+        if (!isInitialized) {
+            initialize();
         }
-        
-        try {
-            PyObject result = function.__call__(pyArgs);
-            return result.__tojava__(Object.class);
-        } catch (PyException e) {
-            throw new RuntimeException("Failed to call Python function: " + functionName, e);
+        return importModuleNative(moduleName);
+    }
+
+    public static Object callFunction(String moduleAlias, String functionName, Object... args) {
+        Object module = moduleCache.get(moduleAlias);
+        if (module == null) {
+            throw new RuntimeError("Module not imported: " + moduleAlias);
         }
+        return callFunctionNative(module, functionName, args);
     }
 
-    /**
-     * Convert a Java object to a Python object
-     * @param obj The Java object to convert
-     * @return The equivalent Python object
-     */
-    public static PyObject toPython(Object obj) {
-        return Py.java2py(obj);
-    }
-
-    /**
-     * Convert a Python object to a Java object
-     * @param pyObj The Python object to convert
-     * @param targetClass The target Java class
-     * @return The equivalent Java object
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T toJava(PyObject pyObj, Class<T> targetClass) {
-        return (T) pyObj.__tojava__(targetClass);
-    }
-
-    /**
-     * Execute arbitrary Python code
-     * @param code The Python code to execute
-     */
     public static void exec(String code) {
-        try {
-            interpreter.exec(code);
-        } catch (PyException e) {
-            throw new RuntimeException("Failed to execute Python code", e);
+        if (!isInitialized) {
+            initialize();
+        }
+        execNative(code);
+    }
+
+    public static Object eval(String expression) {
+        if (!isInitialized) {
+            initialize();
+        }
+        return evalNative(expression);
+    }
+
+    public static Object toPython(Object obj) {
+        if (!isInitialized) {
+            initialize();
+        }
+        return toPythonNative(obj);
+    }
+
+    public static <T> T toJava(Object pyObj, Class<T> targetClass) {
+        if (!isInitialized) {
+            initialize();
+        }
+        return toJavaNative(pyObj, targetClass);
+    }
+
+    public static void cleanup() {
+        if (isInitialized) {
+            cleanupNative();
+            isInitialized = false;
         }
     }
 
-    /**
-     * Evaluate a Python expression
-     * @param expression The Python expression to evaluate
-     * @return The result of the evaluation
-     */
-    public static Object eval(String expression) {
-        try {
-            PyObject result = interpreter.eval(expression);
-            return result.__tojava__(Object.class);
-        } catch (PyException e) {
-            throw new RuntimeException("Failed to evaluate Python expression", e);
-        }
-    }
+    // Native method declarations
+    private static native Object importModuleNative(String moduleName);
+    private static native Object callFunctionNative(Object module, String functionName, Object[] args);
+    private static native void execNative(String code);
+    private static native Object evalNative(String expression);
+    private static native Object toPythonNative(Object obj);
+    private static native <T> T toJavaNative(Object pyObj, Class<T> targetClass);
+    private static native void cleanupNative();
 } 

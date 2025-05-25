@@ -8,6 +8,16 @@ public class RuntimeError extends RuntimeException {
         this.instructionIndex = instructionIndex;
     }
 
+    public RuntimeError(String message) {
+        super(message);
+        this.instructionIndex = -1;
+    }
+
+    public RuntimeError(String message, Throwable cause) {
+        super(message, cause);
+        this.instructionIndex = -1;
+    }
+
     public int getInstructionIndex() {
         return instructionIndex;
     }

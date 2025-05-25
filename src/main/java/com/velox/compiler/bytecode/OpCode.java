@@ -4,56 +4,52 @@ package com.velox.compiler.bytecode;
  * Enumeration of bytecode operation codes.
  */
 public enum OpCode {
-    // Stack operations
-    PUSH,
-    POP,
-    DUP,
-    SWAP,
+    // Constants
+    CONSTANT,
+    NIL,
+    TRUE,
+    FALSE,
 
-    // Arithmetic operations
+    // Arithmetic
     ADD,
-    SUB,
-    MUL,
-    DIV,
-    MOD,
-    NEG,
+    SUBTRACT,
+    MULTIPLY,
+    DIVIDE,
+    NEGATE,
+    NOT,
 
-    // Comparison operations
-    EQ,
-    NE,
-    LT,
-    LE,
-    GT,
-    GE,
+    // Comparison
+    EQUAL,
+    NOT_EQUAL,
+    LESS,
+    LESS_EQUAL,
+    GREATER,
+    GREATER_EQUAL,
 
-    // Control flow operations
-    JUMP,
-    JUMP_IF_FALSE,
-    JUMP_IF_TRUE,
-    CALL,
-    RETURN,
-
-    // Variable operations
+    // Variables
     GET_LOCAL,
     SET_LOCAL,
     GET_GLOBAL,
     SET_GLOBAL,
 
-    // Object operations
-    NEW,
+    // Properties
     GET_PROPERTY,
     SET_PROPERTY,
-    THIS,
-    SUPER,
+
+    // Control flow
+    JUMP,
+    JUMP_IF_FALSE,
+    LOOP,
+    CALL,
+    RETURN,
+
+    // Stack operations
+    POP,
+    PRINT,
 
     // Module operations
     IMPORT,
-    EXPORT,
 
-    // Function operations
-    PARAM,
-    CLOSURE,
-
-    // Special operations
-    HALT
+    // Type system
+    TYPE_INFO
 } 

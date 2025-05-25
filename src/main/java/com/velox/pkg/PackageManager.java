@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.nio.file.*;
-import com.velox.std.JSON;
+import com.velox.std.StandardLibrary.JSON;
 
 public class PackageManager {
     private static final String PACKAGE_REGISTRY = "https://packages.velox-lang.org";

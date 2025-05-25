@@ -3,14 +3,21 @@ package com.velox.compiler.optimizer;
 import com.velox.compiler.ast.*;
 import com.velox.compiler.ast.expressions.*;
 import com.velox.compiler.ast.statements.*;
+import com.velox.compiler.bytecode.Bytecode;
 import java.util.*;
 
 public class Optimizer {
     private final List<OptimizationPass> passes;
+    private int optimizationLevel;
     
     public Optimizer() {
         this.passes = new ArrayList<>();
+        this.optimizationLevel = 0;
         initializePasses();
+    }
+    
+    public void setLevel(int level) {
+        this.optimizationLevel = level;
     }
     
     private void initializePasses() {
@@ -21,9 +28,15 @@ public class Optimizer {
         passes.add(new StrengthReductionPass());
     }
     
+    public Bytecode optimize(Bytecode bytecode) {
+        // For now, just return the bytecode as is
+        // TODO: Implement bytecode-level optimizations
+        return bytecode;
+    }
+    
     public void optimize(AST node) {
-        for (OptimizationPass pass : passes) {
-            pass.optimize(node);
+        for (int i = 0; i <= optimizationLevel && i < passes.size(); i++) {
+            passes.get(i).optimize(node);
         }
     }
     
