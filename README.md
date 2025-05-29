@@ -137,6 +137,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Currently in Development
 ## Acknowledgments
 
-- Thanks to all contributors
 - Inspired by modern programming languages
 - Built with performance and developer experience in mind
