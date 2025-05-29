@@ -134,7 +134,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## It is an ongoing Project
-
+- Currently in Development
 ## Acknowledgments
 
 - Thanks to all contributors
